@@ -1,0 +1,9 @@
+- add hr result check things (error box) in the initializations part, when creating different buffers
+
+- So, I need to build it so that there are no pointers in the struct that is getting packaged
+and sent to the vertex buffer. Instead, I want an array of the actual struct, and send that in.
+So I need to build another struct with all the pointers and shit, including the indices and the
+vertex count.
+
+Think back to the triangle data, it was an array on the outside, and then filled with data depending
+on how long the array was; syntax wise it had to be what I have to implement.

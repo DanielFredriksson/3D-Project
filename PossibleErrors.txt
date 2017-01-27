@@ -1,0 +1,7 @@
+List:
+
+1) SetProjectionMatrix() - Input parameters '0.1' and '20' may need tweaking.
+2) All Matrices - Possibly incorrect in regards to syntax (* pointer mode)
+3) InitializeConstantBuffers(GSConstantDataMatrices* constData): Possibly incorrect in regards to the pointer (&, perhaps?)
+4) CreateTriangleData - Might need the original TriangleVertexStruct rather than a copy.
+5) Geometry.hlsl	- float3 halfXYZ might need to be float (It's gonna be a vector)
