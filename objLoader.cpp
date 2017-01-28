@@ -42,7 +42,7 @@ void objLoader::importObjFile(std::string fileName)
 										// -- ACQUIRING VERTEX COUNT AS WELL AS ALLOCATING MOST MEMORY --
 		if (currentString == "vc")
 		{
-			input_file >>  this->CalcRelatedData.vertexCount;
+			input_file >> this->CalcRelatedData.vertexCount;
 
 			(this->bufferData) = new objData[this->CalcRelatedData.vertexCount];	// Allocating memory (1 vertex + 1 normal)
 

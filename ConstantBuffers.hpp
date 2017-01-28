@@ -5,6 +5,9 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include "Globals.hpp"
+//#include "Camera.hpp"	// InitialiseConstantMatrices()
+
+
 
 struct GSConstantDataMatrices	///Defining WHAT it is that's being sent to the Geometry Shader
 {
@@ -16,8 +19,6 @@ struct GSConstantDataMatrices	///Defining WHAT it is that's being sent to the Ge
 	DirectX::XMMATRIX RotationY90;
 
 	DirectX::XMMATRIX FlipMatrixY;
-
-	//DirectX::XMVECTOR halfXYZ;
 };
 
 struct GSConstantDataFloats
@@ -30,8 +31,6 @@ struct GSConstantDataFloats
 	DirectX::XMFLOAT4X4 RotationY90;
 
 	DirectX::XMFLOAT4X4 FlipMatrix;
-
-	//float HalfXYZ;
 };
 
 void CreateSetConstantBuffers(
@@ -41,9 +40,9 @@ void CreateSetConstantBuffers(
 	ID3D11Buffer* *ConstantBuffer
 );
 
-void InitializeConstantMatrices(
-	GSConstantDataMatrices *constData
-);	///Parameters are HARDCODED for the matrices
+// Does not initialise the ViewMatrix, since Camera.UpdateCamera() does this.
+//
+void InitializeConstantMatrices(GSConstantDataMatrices *constData);	///Parameters are HARDCODED for the matrices except for VIEWMATRIX
 
 void MatrixToFloat4X4Reformat(
 	GSConstantDataMatrices  *MatrixStruct,
@@ -53,8 +52,8 @@ void MatrixToFloat4X4Reformat(
 
 void AlterConstantBuffers(
 	ID3D11Buffer* TargetBuffer,
-	GSConstantDataMatrices TargetStruct,
-	ID3D11DeviceContext* DeviceContext
+	GSConstantDataFloats TargetStruct,
+	ID3D11DeviceContext* *DeviceContext
 );
 
 

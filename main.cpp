@@ -1,21 +1,6 @@
 
 
 
-// Make it so TriangleVertices can be send as an in-parameter to CreateTriangleData,
-// preferably declaring it in "objects.hpp"
-//
-// Send halfXYZ to the geometryShader through the constant buffer.
-//
-// Make the room bigger by making the inital vertices bigger.
-//
-//
-//
-//
-
-
-
-
-
 
 
 
@@ -35,12 +20,21 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
-//
-#include "Shaders.hpp"
 #include "Initializations.hpp"		// Also includes "Objects.hpp"
 #include "ConstantBuffers.hpp"
 #include "FrequentFunctions.hpp"
+
+// INPUT
 #include "objLoader.hpp"
+
+// DIRECTX3D
+#include "Direct3D.hpp"
+
+// DEFERRED-SHADER
+#include "BasicShader.hpp"
+
+// CAMERA
+#include "Camera.hpp"
 
 //
 #pragma comment (lib, "d3d11.lib")
@@ -50,63 +44,48 @@
 #include <crtdbg.h>
 
 
-HRESULT ghr;
-
-// DIRECTX REQUIRED
-IDXGISwapChain* gSwapChain = nullptr;
-ID3D11Device* gDevice = nullptr;
-ID3D11DeviceContext* gDeviceContext = nullptr;
-
-ID3D11RenderTargetView* gBackBufferRTV = nullptr;
-
+// INPUT ASSEMBLY
 ID3D11Buffer* gVertexBuffer = nullptr;
 ID3D11Buffer* gIndexBuffer = nullptr;
+
+// CONSTANT BUFFER
 ID3D11Buffer* gConstantBuffer = nullptr;
 
-// DEPTH BUFFER
-ID3D11Texture2D* gDepthStencil = nullptr;
-ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
-// INPUT ASSEMBLY
-ID3D11InputLayout* gVertexLayout = nullptr;
-
-// PIPELINE STAGES
-ID3D11VertexShader* gVertexShader = nullptr;
-ID3D11GeometryShader* gGeometryShader = nullptr;
-ID3D11PixelShader* gPixelShader = nullptr;
-
-
-
-
-int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	MSG msg = { 0 };
-	HWND wndHandle = InitiateWindow(hInstance, WindowsProcedure); //1. Create Window
-	
+	Direct3DContext DirectXManager;
+	Camera MainCam;
+	BasicShaderClass BasicShader;
+
+	MSG msg = { 0 };													// Necessary to handle input to WindowsProcedure
+	HWND wndHandle = InitiateWindow(hInstance, WindowsProcedure);		// Necessary to use a window
+
 	if (wndHandle)
 	{
-		//~ Initializations
-		CreateDirect3DContext(
+		// Containers which will be send to the GeometryShader via Constant Buffer
+		GSConstantDataMatrices GSConstDataMatrices;						// Unformatted, XMVECTOR/XMMATRIX types
+		GSConstantDataFloats GSConstDataFloats;							// Formatted,	XMFLOATS
+
+		BasicShader.GetRenderTargetView();
+
+		// Set up 3DContext & viewport
+		DirectXManager.CreateDirect3DContext(
 			wndHandle,
-			&gSwapChain,
-			&gDevice,
-			&gDeviceContext,
-			&gBackBufferRTV,
-			&gDepthStencil,
-			&gDepthStencilView);
+			BasicShader.GetRenderTargetView(),
+			BasicShader.GetDepthStencil(),
+			BasicShader.GetDepthStencilView()
+		);
+		DirectXManager.CreateViewport();
 
-		//~ Initializations
-		CreateViewport(&gDeviceContext);
-
-		//~ Shaders
-		CreateShadersFunc(gDevice, &gVertexShader, &gGeometryShader, &gPixelShader, &gVertexLayout);	//4. Create Vertex and Pixel Shaders
+		// Initialise 
+		BasicShader.InitialiseShaders(&DirectXManager.Device);
 
 		// VARIOUS OBJECTS
 		std::string test_string;
 		test_string = "obj_files/teddy.obj";	// Requires a cam of -35 (z-direction)
-		//test_string = "obj_files/cube.obj";	// Requires a cam of -2 (z-direction)
 
 		//~ ObjectLoader
 		objLoader firstObject;
@@ -114,75 +93,105 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		firstObject.importObjFile(test_string);
 
 		//~ Initializations
-		CreateObjectData(&gDevice,
+		CreateObjectData(
+			&DirectXManager.Device,
 			&gVertexBuffer,
 			&gIndexBuffer,
 			firstObject.get_objData(),
 			firstObject.get_calcData()
 		);
 
-		GSConstantDataMatrices GSConstDataMatrices;			// Create ONE 'GSConstantDataMatrices'. This holds various different
-															// 'XMMATRIX' objects; world, view, projection, flip, etc.
-		//~ ConstantBuffers
-		InitializeConstantMatrices(&GSConstDataMatrices);	// Fill the three above mentioned 'XMMATRIX's with information
+		////------------------------------------ WILL BE REPLACED WITH OLIVER CODE ------------------------------------
+		//TriangleVertex TriangleVertices[VERTICE_COUNT_TRIANGLES] =
+		//{
+		//	/* WHEN CHANGING, ALSO CHANGE:
+		//	verticeSize...
 
-		GSConstantDataFloats GSConstDataFloats;				
+		//	*/
 
-		//~ ConstantBuffers
-		MatrixToFloat4X4Reformat(&GSConstDataMatrices, GSConstDataFloats);  // Reformat the 'XMMATRIX's to 'XMFLOAT4X4's so the HLSL can work
-																			// with the data.
-		//~ ConstantBuffers
-		CreateSetConstantBuffers(	// Create Constant Buffer & Send to Geometry Shader
+		//	-0.5f, -0.5f, 0.0f,		//v0 pos (Bottom Left)
+		//	1.0f, 0.0f, 0.0f,		//v0 colour
+
+		//	-0.5f, 0.5f, 0.0f,		//v1 pos (Top Left)
+		//	0.0f, 1.0f, 0.0f,		//v1 colour
+
+		//	0.5f, -0.5f, 0.0f,		//v2 pos (Bottom Right)
+		//	0.0f, 0.0f, 1.0f,		//v2 colour
+
+		//	0.5f, 0.5f, 0.0f,		//v3 pos (Top Right)
+		//	1.0f, 0.0f, 1.0f		//v3 colour
+		//};
+		////~ Initializations
+		//CreateTriangleData(DirectXManager.Device, gVertexBuffer, TriangleVertices);
+		//------------------------------------ WILL BE REPLACED WITH OLIVER CODE ------------------------------------
+
+
+		// Initialise CB-Matrices, Reformat them, and set the reformatted data to a Created&Set constant buffer
+		InitializeConstantMatrices(
+			&GSConstDataMatrices
+		);
+		MatrixToFloat4X4Reformat(	//~ ConstantBuffers
+			&GSConstDataMatrices,
+			GSConstDataFloats
+		);
+		CreateSetConstantBuffers(	//~ ConstantBuffers
 			&GSConstDataFloats,
-			&gDevice,
-			&gDeviceContext,
+			&DirectXManager.Device,
+			&DirectXManager.DeviceContext,
 			&gConstantBuffer
 		);
 
+		// Display window
 		ShowWindow(wndHandle, nCmdShow);
 
-		while (WM_QUIT != msg.message)
+
+		POINT LastMouseCoordinates = { 0, 0 };		// Gets the value from the last mouse coordinates
+		POINT CursorMovement = { 0, 0 };			// Gets the difference between New&Last coordinates
+		while (msg.message != WM_QUIT)
 		{
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
-				TranslateMessage(&msg);
+				TranslateMessage(&msg);	// Calls WindowProcedure in some part of its internal process.
 				DispatchMessage(&msg);
+
+
+				CursorMovement.x = msg.pt.x - LastMouseCoordinates.x;
+				CursorMovement.y = msg.pt.y - LastMouseCoordinates.y;
+				LastMouseCoordinates = msg.pt;
+
+				MainCam.UpdateCamera(		// Updates the camera dependant on the character input data.
+					msg.wParam,				// msg.Wparam Contains the character of the key which was pressed.
+					CursorMovement,
+					&GSConstDataFloats,
+					&gConstantBuffer,
+					&DirectXManager.DeviceContext
+				);
+
+
 			}
 			else
 			{
-				//~ FrequentFunctions
-				Render(		//8. Render
-					&gDeviceContext,
-					gBackBufferRTV,
+				// Render
+				BasicShader.Render(
+					&DirectXManager.DeviceContext,
 					&gVertexBuffer,
 					&gIndexBuffer,
-					firstObject.get_calcData(),
-					gVertexLayout,
-					gVertexShader,
-					gGeometryShader,
-					gPixelShader,
-					gDepthStencilView
-				); 
+					firstObject.get_calcData()
+				);
 
-				gSwapChain->Present(1, 0); //9. Swap front- och back-buffer
+				// Swap front(window)-buffer & back-buffer
+				DirectXManager.SwapChain->Present(1, 0);
 			}
 		}
 
 		gVertexBuffer->Release();
-		gIndexBuffer->Release();	/// Releasing the Index Buffer
-		gConstantBuffer->Release();	/// Releasing the Constant Buffer
+		gConstantBuffer->Release();	///Releasing the Constant Buffer
 
-		gVertexLayout->Release();
-		gVertexShader->Release();
-		gGeometryShader->Release();
-		gPixelShader->Release();
+		BasicShader.ReleaseAll();
+		DirectXManager.Release();
 
-		gBackBufferRTV->Release();
-		gSwapChain->Release();
-		gDevice->Release();
-		gDeviceContext->Release();
 		DestroyWindow(wndHandle);
 	}
 
-	return (int) msg.wParam;
+	return (int)msg.wParam;
 }
