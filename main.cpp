@@ -156,7 +156,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 					gBackBufferRTV,
 					&gVertexBuffer,
 					&gIndexBuffer,
-					&CalcRelatedData_teddy,
+					firstObject.get_calcData(),
 					gVertexLayout,
 					gVertexShader,
 					gGeometryShader,

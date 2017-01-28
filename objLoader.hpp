@@ -35,8 +35,8 @@ struct calcData
 class objLoader
 {
 private:
-	objData* objData_teddy;
-	calcData CalcRelatedData_teddy;
+	objData* bufferData;
+	calcData CalcRelatedData;
 
 	int normal_count;
 	int face_count;

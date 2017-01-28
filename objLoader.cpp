@@ -1,4 +1,4 @@
-#include "object"
+#include "objLoader.hpp"
 
 objLoader::objLoader()
 {
@@ -42,12 +42,12 @@ void objLoader::importObjFile(std::string fileName)
 										// -- ACQUIRING VERTEX COUNT AS WELL AS ALLOCATING MOST MEMORY --
 		if (currentString == "vc")
 		{
-			input_file >> this->CalcRelatedData_teddy->vertexCount;
+			input_file >>  this->CalcRelatedData.vertexCount;
 
-			(*object) = new objData[data->vertexCount];	// Allocating memory (1 vertex + 1 normal)
+			(this->bufferData) = new objData[this->CalcRelatedData.vertexCount];	// Allocating memory (1 vertex + 1 normal)
 
-			vectorNormals = new DirectX::XMVECTOR[data->vertexCount];	// These are for CALCULATIONS
-			vectorVertices = new DirectX::XMVECTOR[data->vertexCount];	// and are discarded at the end.
+			vectorNormals = new DirectX::XMVECTOR[this->CalcRelatedData.vertexCount];	// These are for CALCULATIONS
+			vectorVertices = new DirectX::XMVECTOR[this->CalcRelatedData.vertexCount];	// and are discarded at the end.
 		}
 
 
@@ -62,8 +62,8 @@ void objLoader::importObjFile(std::string fileName)
 			input_file >> face_count;
 
 			faces = new DirectX::XMFLOAT3[face_count];	// Used for CALCULATIONS; doesn't get saved
-			data->indexCount = (face_count * 3);
-			data->indices = new unsigned long[data->indexCount];
+			this->CalcRelatedData.indexCount = (face_count * 3);
+			this->CalcRelatedData.indices = new unsigned long[this->CalcRelatedData.indexCount];
 		}
 
 
@@ -71,7 +71,7 @@ void objLoader::importObjFile(std::string fileName)
 
 
 		// -- STORING EACH VERTEX IN 2 SEPARATE DATA TYPES --
-		for (int i = 0; i < data->vertexCount; i++)
+		for (int i = 0; i < this->CalcRelatedData.vertexCount; i++)
 		{
 
 			input_file >> currentString;		// -- READS and DISCARDS each 'v' --
@@ -87,8 +87,8 @@ void objLoader::importObjFile(std::string fileName)
 
 			float3 *= -1.0f;	// Converting from right-handed to left-handed system
 
-			(*object)[i].vertex = { float1, float2, float3 };	// Stored in FLOAT3 form
-			vectorVertices[i] = { float1, float2, float3 };		// Stored in VECTOR form
+			this->bufferData[i].vertex = { float1, float2, float3 };	// Stored in FLOAT3 form
+			vectorVertices[i] = { float1, float2, float3 };				// Stored in VECTOR form
 		}
 
 
@@ -113,9 +113,9 @@ void objLoader::importObjFile(std::string fileName)
 			int2 -= 1;	// Because an index start at 0, not 1
 			int3 -= 1;	//
 
-			data->indices[(j * 3) + 0] = int3;		// Here we store the values from each face backwards,
-			data->indices[(j * 3) + 1] = int2;		// as in the 3rd vertex -> 1st vertex, etc. This is
-			data->indices[(j * 3) + 2] = int1;		// done to convert from right-hand to left-hand sys.
+			this->CalcRelatedData.indices[(j * 3) + 0] = int3;		// Here we store the values from each face backwards,
+			this->CalcRelatedData.indices[(j * 3) + 1] = int2;		// as in the 3rd vertex -> 1st vertex, etc. This is
+			this->CalcRelatedData.indices[(j * 3) + 2] = int1;		// done to convert from right-hand to left-hand sys.
 
 			vector1 = DirectX::XMVectorSubtract(	// Triangle Face's Side (#1)
 				vectorVertices[int1],
@@ -139,12 +139,12 @@ void objLoader::importObjFile(std::string fileName)
 
 
 		// --	LOOP FOR NORMALIZING & STORING ALL NORMALS --
-		for (int k = 0; k < data->vertexCount; k++)
+		for (int k = 0; k < this->CalcRelatedData.vertexCount; k++)
 		{
 			vectorNormals[k] = DirectX::XMVector3Normalize(vectorNormals[k]); // Normalize all normals
 
-			DirectX::XMStoreFloat3(&(*object)[k].normal, vectorNormals[k]); // Storing all normals
-			(*object)[k].normal.z = (*object)[k].normal.z * -1.0f; // Converting normals from a right-hand
+			DirectX::XMStoreFloat3(&this->bufferData[k].normal, vectorNormals[k]); // Storing all normals
+			this->bufferData[k].normal.z = this->bufferData[k].normal.z * -1.0f; // Converting normals from a right-hand
 		}														   // system to a left-hand system.
 	}
 
@@ -161,10 +161,10 @@ void objLoader::importObjFile(std::string fileName)
 
 objData* *objLoader::get_objData()
 {
-	return this->objData_teddy;
+	return &this->bufferData;
 }
 
 calcData *objLoader::get_calcData()
 {
-	return this
+	return &this->CalcRelatedData;
 }
