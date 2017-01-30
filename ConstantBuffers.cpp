@@ -2,7 +2,7 @@
 
 
 void CreateSetConstantBuffers(
-	GSConstantDataFloats *ConstDataFloats,
+	MatrixBufferStored *ConstDataFloats,
 	ID3D11Device* *Device,
 	ID3D11DeviceContext* *DeviceContext,
 	ID3D11Buffer* *ConstantBuffer
@@ -11,7 +11,7 @@ void CreateSetConstantBuffers(
 	// BUFFER DESCRIPTION: 'Settings'
 	D3D11_BUFFER_DESC cbDesc;
 	memset(&cbDesc, 0, sizeof(cbDesc));
-	cbDesc.ByteWidth = sizeof(GSConstantDataFloats);
+	cbDesc.ByteWidth = sizeof(MatrixBufferStored);
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;						// Needs to be DYNAMIC so that we can Map/Unmap,
 	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;			// via ~AlterConstantBuffers()
 	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -36,7 +36,7 @@ void CreateSetConstantBuffers(
 	// Efter constant buffern har skapats så 'settas' den
 }
 
-void InitializeConstantMatrices(GSConstantDataMatrices *constData)	///Parameters are HARDCODED for the matrices except for VIEWMATRIX
+void InitializeConstantMatrices(MatrixBufferLoaded *constData)	///Parameters are HARDCODED for the matrices except for VIEWMATRIX
 {
 	//WORLD MATRIX
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
@@ -89,8 +89,8 @@ void InitializeConstantMatrices(GSConstantDataMatrices *constData)	///Parameters
 };
 
 void MatrixToFloat4X4Reformat(
-	GSConstantDataMatrices  *MatrixStruct,
-	GSConstantDataFloats	&FloatsStruct
+	MatrixBufferLoaded  *MatrixStruct,
+	MatrixBufferStored	&FloatsStruct
 )
 {
 	// Reformat to float4x4
@@ -107,7 +107,7 @@ void MatrixToFloat4X4Reformat(
 
 void AlterConstantBuffers(
 	ID3D11Buffer* TargetBuffer,
-	GSConstantDataFloats TargetStruct,
+	MatrixBufferStored TargetStruct,
 	ID3D11DeviceContext* *DeviceContext
 )
 {

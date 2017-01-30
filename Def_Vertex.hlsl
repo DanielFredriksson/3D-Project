@@ -13,9 +13,9 @@ struct MatrixStruct
 
 struct Deferred_VertexShader_Input
 {
-	// Position		: POSITION
-	// Normal		: NORMAL
-	// TextureCoordinate
+	float3 Position : POSITION;
+	float3 Normal	: NORMAL;
+	float2 TexUV	: TEXCOORD;
 };
 
 struct Deferred_PixelShader_Input

@@ -167,7 +167,7 @@ void DeferredBuffersClass::SetAllRenderTargets(ID3D11DeviceContext* *DeviceConte
 	(*DeviceContext)->RSSetViewports(1, &this->ViewPort);
 }
 
-void DeferredBuffersClass::ClearAll(
+void DeferredBuffersClass::ClearAllRenderTargets(
 	ID3D11DeviceContext*	*DeviceContext,
 	float					ClearColor_Red,
 	float					ClearColor_Blue,

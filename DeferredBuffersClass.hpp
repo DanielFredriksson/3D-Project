@@ -38,6 +38,7 @@ private:
 	// Used as a lens to work with the RenderTargetTextureArray above.
 	ID3D11RenderTargetView* RenderTargetViewArray[BUFFER_COUNT];
 
+	// Used as a lens to work with textures(?)
 	ID3D11ShaderResourceView* ShaderResourceViewArray[BUFFER_COUNT];
 
 	ID3D11Texture2D* DepthStencilBuffer;
@@ -60,7 +61,7 @@ public:
 
 	void SetAllRenderTargets(ID3D11DeviceContext* *DeviceContext);
 
-	void ClearAll(
+	void ClearAllRenderTargets(
 		ID3D11DeviceContext*	*DeviceContext,
 		float					ClearColor_Red,
 		float					ClearColor_Blue,

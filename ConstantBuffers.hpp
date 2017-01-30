@@ -7,9 +7,9 @@
 #include "Globals.hpp"
 //#include "Camera.hpp"	// InitialiseConstantMatrices()
 
+// GSConstantDataMatrices
 
-
-struct GSConstantDataMatrices	///Defining WHAT it is that's being sent to the Geometry Shader
+struct MatrixBufferLoaded	///Defining WHAT it is that's being sent to the Geometry Shader
 {
 	DirectX::XMMATRIX world;
 	DirectX::XMMATRIX view;
@@ -21,7 +21,7 @@ struct GSConstantDataMatrices	///Defining WHAT it is that's being sent to the Ge
 	DirectX::XMMATRIX FlipMatrixY;
 };
 
-struct GSConstantDataFloats
+struct MatrixBufferStored
 {
 	DirectX::XMFLOAT4X4 world;
 	DirectX::XMFLOAT4X4 view;
@@ -34,7 +34,7 @@ struct GSConstantDataFloats
 };
 
 void CreateSetConstantBuffers(
-	GSConstantDataFloats *ConstData,
+	MatrixBufferStored *ConstData,
 	ID3D11Device* *Device,
 	ID3D11DeviceContext* *DeviceContext,
 	ID3D11Buffer* *ConstantBuffer
@@ -42,17 +42,17 @@ void CreateSetConstantBuffers(
 
 // Does not initialise the ViewMatrix, since Camera.UpdateCamera() does this.
 //
-void InitializeConstantMatrices(GSConstantDataMatrices *constData);	///Parameters are HARDCODED for the matrices except for VIEWMATRIX
+void InitializeConstantMatrices(MatrixBufferLoaded *constData);	///Parameters are HARDCODED for the matrices except for VIEWMATRIX
 
 void MatrixToFloat4X4Reformat(
-	GSConstantDataMatrices  *MatrixStruct,
-	GSConstantDataFloats	&FloatsStruct
+	MatrixBufferLoaded  *MatrixStruct,
+	MatrixBufferStored	&FloatsStruct
 );
 
 
 void AlterConstantBuffers(
 	ID3D11Buffer* TargetBuffer,
-	GSConstantDataFloats TargetStruct,
+	MatrixBufferStored TargetStruct,
 	ID3D11DeviceContext* *DeviceContext
 );
 

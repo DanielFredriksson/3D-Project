@@ -36,7 +36,12 @@
 // CAMERA
 #include "Camera.hpp"
 
-//
+// --- CURRENTLY TESTING
+#include "DeferredBuffersClass.hpp"
+#include "DeferredShaderClass.hpp"
+
+// --- CURRENTLY TESTING
+
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
@@ -66,8 +71,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (wndHandle)
 	{
 		// Containers which will be send to the GeometryShader via Constant Buffer
-		GSConstantDataMatrices GSConstDataMatrices;						// Unformatted, XMVECTOR/XMMATRIX types
-		GSConstantDataFloats GSConstDataFloats;							// Formatted,	XMFLOATS
+		MatrixBufferLoaded UnformattedMatrixData;						// Unformatted, XMVECTOR/XMMATRIX types
+		MatrixBufferStored FormattedMatrixData;							// Formatted,	XMFLOATS
 
 		BasicShader.GetRenderTargetView();
 
@@ -101,45 +106,45 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			firstObject.get_calcData()
 		);
 
-		////------------------------------------ WILL BE REPLACED WITH OLIVER CODE ------------------------------------
-		//TriangleVertex TriangleVertices[VERTICE_COUNT_TRIANGLES] =
-		//{
-		//	/* WHEN CHANGING, ALSO CHANGE:
-		//	verticeSize...
-
-		//	*/
-
-		//	-0.5f, -0.5f, 0.0f,		//v0 pos (Bottom Left)
-		//	1.0f, 0.0f, 0.0f,		//v0 colour
-
-		//	-0.5f, 0.5f, 0.0f,		//v1 pos (Top Left)
-		//	0.0f, 1.0f, 0.0f,		//v1 colour
-
-		//	0.5f, -0.5f, 0.0f,		//v2 pos (Bottom Right)
-		//	0.0f, 0.0f, 1.0f,		//v2 colour
-
-		//	0.5f, 0.5f, 0.0f,		//v3 pos (Top Right)
-		//	1.0f, 0.0f, 1.0f		//v3 colour
-		//};
-		////~ Initializations
-		//CreateTriangleData(DirectXManager.Device, gVertexBuffer, TriangleVertices);
-		//------------------------------------ WILL BE REPLACED WITH OLIVER CODE ------------------------------------
-
-
 		// Initialise CB-Matrices, Reformat them, and set the reformatted data to a Created&Set constant buffer
 		InitializeConstantMatrices(
-			&GSConstDataMatrices
+			&UnformattedMatrixData
 		);
 		MatrixToFloat4X4Reformat(	//~ ConstantBuffers
-			&GSConstDataMatrices,
-			GSConstDataFloats
+			&UnformattedMatrixData,
+			FormattedMatrixData
 		);
 		CreateSetConstantBuffers(	//~ ConstantBuffers
-			&GSConstDataFloats,
+			&FormattedMatrixData,
 			&DirectXManager.Device,
 			&DirectXManager.DeviceContext,
 			&gConstantBuffer
 		);
+		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		//																					//
+		//									TESTING AREA									//
+		//																					//
+		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		
+		DeferredBuffersClass TestBuffers;
+		/* Currently no error with:
+		TestBuffers.InitializeBuffers(&DirectXManager.Device, SCREEN_WIDTH, SCREEN_HEIGHT);
+		TestBuffers.SetAllRenderTargets(&DirectXManager.DeviceContext);
+		
+		*/
+		/* Currently no error with: 
+		TestShader.InitialiseShaders(&DirectXManager.Device);
+		*/
+		DeferredShaderClass TestShader;
+		
+
+
+
+		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		//																					//
+		//									TESTING AREA									//
+		//																					//
+		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 		// Display window
 		ShowWindow(wndHandle, nCmdShow);
@@ -162,7 +167,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				MainCam.UpdateCamera(		// Updates the camera dependant on the character input data.
 					msg.wParam,				// msg.Wparam Contains the character of the key which was pressed.
 					CursorMovement,
-					&GSConstDataFloats,
+					&FormattedMatrixData,
 					&gConstantBuffer,
 					&DirectXManager.DeviceContext
 				);

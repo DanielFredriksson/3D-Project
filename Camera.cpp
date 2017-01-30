@@ -15,7 +15,7 @@ Camera::~Camera()
 void Camera::UpdateCamera(
 	TCHAR					CharacterMessage,
 	POINT					MouseCoordinates,
-	GSConstantDataFloats	*FormattedStructData,
+	MatrixBufferStored	*FormattedStructData,
 	ID3D11Buffer*			*GSConstantBuffer,
 	ID3D11DeviceContext*	*DeviceContext
 )
