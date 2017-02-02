@@ -14,7 +14,32 @@ BasicShaderClass::~BasicShaderClass()
 {
 	// Currently releasing manually, so nothing needed here atm.
 }
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PUBLIC FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+void BasicShaderClass::Initialize(ID3D11Device* *Device)
+{
+	this->InitialiseShaders(Device);
+}
 
+void BasicShaderClass::ReleaseAll()
+{
+	this->VertexShader->Release();
+	this->GeometryShader->Release();
+	this->PixelShader->Release();
+	this->BackBufferRTV->Release();
+	this->DepthStencil->Release();
+	this->DepthStencilView->Release();
+}
+
+
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PRIVATE FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ID3D11RenderTargetView* *BasicShaderClass::GetRenderTargetView()
 {
 	return &this->BackBufferRTV;
@@ -191,19 +216,10 @@ void BasicShaderClass::InitialiseShaders(ID3D11Device* *Device)
 
 void BasicShaderClass::SetShadersAndShaderResources(ID3D11DeviceContext* *DeviceContext)
 {
-	(*DeviceContext)->VSSetShader(VertexShader, nullptr, 0);
+	(*DeviceContext)->VSSetShader(this->VertexShader, nullptr, 0);
 	(*DeviceContext)->HSSetShader(nullptr, nullptr, 0);
 	(*DeviceContext)->DSSetShader(nullptr, nullptr, 0);
-	(*DeviceContext)->GSSetShader(GeometryShader, nullptr, 0);
-	(*DeviceContext)->PSSetShader(PixelShader, nullptr, 0);
+	(*DeviceContext)->GSSetShader(this->GeometryShader, nullptr, 0);
+	(*DeviceContext)->PSSetShader(this->PixelShader, nullptr, 0);
 }
 
-void BasicShaderClass::ReleaseAll()
-{
-	this->VertexShader->Release();
-	this->GeometryShader->Release();
-	this->PixelShader->Release();
-	this->BackBufferRTV->Release();
-	this->DepthStencil->Release();
-	this->DepthStencilView->Release();
-}

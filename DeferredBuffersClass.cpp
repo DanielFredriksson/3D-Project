@@ -153,11 +153,6 @@ void DeferredBuffersClass::InitializeBuffers(
 
 void DeferredBuffersClass::SetAllRenderTargets(ID3D11DeviceContext* *DeviceContext)
 {
-	/*
-	Sets the RenderTargetView's to the OutputMerger stage in the GPU-pipeline.
-	Binds the internal viewport to the Rasterizer stage in the GPU-pipeline.
-	*/
-
 	(*DeviceContext)->OMSetRenderTargets(
 		BUFFER_COUNT,
 		this->RenderTargetViewArray,

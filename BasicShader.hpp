@@ -26,10 +26,8 @@ public:
 	BasicShaderClass();
 	~BasicShaderClass();
 
-	ID3D11RenderTargetView* *GetRenderTargetView();
+	// TO BE PRIVATE BELOW:
 
-	ID3D11Texture2D*		*GetDepthStencil();
-	ID3D11DepthStencilView*	*GetDepthStencilView();
 
 	void Render(
 		ID3D11DeviceContext*	*DeviceContext,
@@ -50,6 +48,16 @@ public:
 		ID3D11Buffer*			*VertexBuffer,
 		ID3D11Buffer*			*IndexBuffer
 	);
+
+
+	// TO-BE PUBLIC BELOW:
+	ID3D11RenderTargetView* *GetRenderTargetView();
+	ID3D11Texture2D*		*GetDepthStencil();
+	ID3D11DepthStencilView*	*GetDepthStencilView();
+
+
+	void Initialize(ID3D11Device* *Device);
+
 
 	void ReleaseAll();
 

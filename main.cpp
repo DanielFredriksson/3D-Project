@@ -24,6 +24,9 @@
 #include "ConstantBuffers.hpp"
 #include "FrequentFunctions.hpp"
 
+// APPLICATION
+#include "ApplicationClass.hpp"
+
 // INPUT
 #include "objLoader.hpp"
 
@@ -61,142 +64,52 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	Direct3DContext DirectXManager;
-	Camera MainCam;
-	BasicShaderClass BasicShader;
+	
+	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	//																					//
+	//									IMPROVED MAIN									//
+	//																					//
+	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	// When this works:
+	//	- Remove '1' from the ConstantBufferLoaded1 & ConstantBufferStored1
+	//	- Remove '1' from AlterConstantBuffers
+	//
+	//
 
-	MSG msg = { 0 };													// Necessary to handle input to WindowsProcedure
-	HWND wndHandle = InitiateWindow(hInstance, WindowsProcedure);		// Necessary to use a window
+	ApplicationClass Application;
 
-	if (wndHandle)
+	Application.Initialize(hInstance);
+
+	Application.SetObjectData();
+
+	ShowWindow(Application.GetWNDHandle(), nCmdShow);
+
+	while (Application.GetInputMessage()->message != WM_QUIT)	// Needs to de-reference the message? (prolly not?)
 	{
-		// Containers which will be send to the GeometryShader via Constant Buffer
-		MatrixBufferLoaded UnformattedMatrixData;						// Unformatted, XMVECTOR/XMMATRIX types
-		MatrixBufferStored FormattedMatrixData;							// Formatted,	XMFLOATS
 
-		BasicShader.GetRenderTargetView();
-
-		// Set up 3DContext & viewport
-		DirectXManager.CreateDirect3DContext(
-			wndHandle,
-			BasicShader.GetRenderTargetView(),
-			BasicShader.GetDepthStencil(),
-			BasicShader.GetDepthStencilView()
-		);
-		DirectXManager.CreateViewport();
-
-		// Initialise 
-		BasicShader.InitialiseShaders(&DirectXManager.Device);
-
-		// VARIOUS OBJECTS
-		std::string test_string;
-		test_string = "obj_files/teddy.obj";	// Requires a cam of -35 (z-direction)
-
-		//~ ObjectLoader
-		objLoader firstObject;
-
-		firstObject.importObjFile(test_string);
-
-		//~ Initializations
-		CreateObjectData(
-			&DirectXManager.Device,
-			&gVertexBuffer,
-			&gIndexBuffer,
-			firstObject.get_objData(),
-			firstObject.get_calcData()
-		);
-
-		// Initialise CB-Matrices, Reformat them, and set the reformatted data to a Created&Set constant buffer
-		InitializeConstantMatrices(
-			&UnformattedMatrixData
-		);
-		MatrixToFloat4X4Reformat(	//~ ConstantBuffers
-			&UnformattedMatrixData,
-			FormattedMatrixData
-		);
-		CreateSetConstantBuffers(	//~ ConstantBuffers
-			&FormattedMatrixData,
-			&DirectXManager.Device,
-			&DirectXManager.DeviceContext,
-			&gConstantBuffer
-		);
-		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		//																					//
-		//									TESTING AREA									//
-		//																					//
-		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		
-		DeferredBuffersClass TestBuffers;
-		/* Currently no error with:
-		TestBuffers.InitializeBuffers(&DirectXManager.Device, SCREEN_WIDTH, SCREEN_HEIGHT);
-		TestBuffers.SetAllRenderTargets(&DirectXManager.DeviceContext);
-		
-		*/
-		/* Currently no error with: 
-		TestShader.InitialiseShaders(&DirectXManager.Device);
-		*/
-		DeferredShaderClass TestShader;
-		
-
-
-
-		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		//																					//
-		//									TESTING AREA									//
-		//																					//
-		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-		// Display window
-		ShowWindow(wndHandle, nCmdShow);
-
-
-		POINT LastMouseCoordinates = { 0, 0 };		// Gets the value from the last mouse coordinates
-		POINT CursorMovement = { 0, 0 };			// Gets the difference between New&Last coordinates
-		while (msg.message != WM_QUIT)
+		if (PeekMessage(Application.GetInputMessage(), nullptr, 0, 0, PM_REMOVE))
 		{
-			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage(&msg);	// Calls WindowProcedure in some part of its internal process.
-				DispatchMessage(&msg);
 
 
-				CursorMovement.x = msg.pt.x - LastMouseCoordinates.x;
-				CursorMovement.y = msg.pt.y - LastMouseCoordinates.y;
-				LastMouseCoordinates = msg.pt;
-
-				MainCam.UpdateCamera(		// Updates the camera dependant on the character input data.
-					msg.wParam,				// msg.Wparam Contains the character of the key which was pressed.
-					CursorMovement,
-					&FormattedMatrixData,
-					&gConstantBuffer,
-					&DirectXManager.DeviceContext
-				);
+			TranslateMessage(Application.GetInputMessage());	// Calls WindowProcedure in some part of its internal process.
+			DispatchMessage(Application.GetInputMessage());
 
 
-			}
-			else
-			{
-				// Render
-				BasicShader.Render(
-					&DirectXManager.DeviceContext,
-					&gVertexBuffer,
-					&gIndexBuffer,
-					firstObject.get_calcData()
-				);
+			Application.UpdateCamera();
 
-				// Swap front(window)-buffer & back-buffer
-				DirectXManager.SwapChain->Present(1, 0);
-			}
+
 		}
+		else
+		{
 
-		gVertexBuffer->Release();
-		gConstantBuffer->Release();	///Releasing the Constant Buffer
+			Application.Render();
 
-		BasicShader.ReleaseAll();
-		DirectXManager.Release();
+			Application.Present();
 
-		DestroyWindow(wndHandle);
+		}
 	}
 
-	return (int)msg.wParam;
+	Application.Shutdown();
+
+	return (int)(*Application.GetInputMessage()).wParam;
 }

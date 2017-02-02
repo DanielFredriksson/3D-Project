@@ -6,34 +6,54 @@
 
 class Direct3DContext {
 private:
-
-
-public:
 	IDXGISwapChain* SwapChain;
 	ID3D11Device* Device;
 	ID3D11DeviceContext* DeviceContext;
 
+public:
 	Direct3DContext();
 	~Direct3DContext();
 
+	// TO-BE PRIVATE BELOW:
+
+
+	// Calls InitialiseDepthStencilAndView()
 	void CreateDirect3DContext(
 		HWND	wndHandle,
 		ID3D11RenderTargetView*	*BackBufferRTV,
-		ID3D11Texture2D*		*DepthStencil,		// Calls InitialiseDepthStencilAndView()
-		ID3D11DepthStencilView*	*DepthStencilView	//
+		ID3D11Texture2D*		*DepthStencil,		
+		ID3D11DepthStencilView*	*DepthStencilView
 	);
 	void InitialiseDepthStencilAndView(
 		ID3D11Texture2D*		*DepthStencil,
 		ID3D11DepthStencilView* *DepthStencilView
 	);
 
+	/* ------------- COMMENTS -------------
+	Creates a viewport according to global SCREEN_WIDTH/HEIGHT and sets
+	it to the rasterizer stage.
+	*/
+	void CreateSetViewport();
 
-	void CreateViewport();
 
 
+	// TO-BE PUBLIC BELOW:
+
+	ID3D11Device* *GetDevice();
+	ID3D11DeviceContext* *GetDeviceContext();
+	IDXGISwapChain* *GetSwapChain();
+	// get swapchain
 
 
-	void Release();
+	void Initialize(
+		HWND	wndHandle,
+		ID3D11RenderTargetView*	*BackBufferRTV,
+		ID3D11Texture2D*		*DepthStencil,
+		ID3D11DepthStencilView*	*DepthStencilView
+	);
+
+
+	void ReleaseAll();
 
 
 };

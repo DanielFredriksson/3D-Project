@@ -26,9 +26,10 @@
 	- SV_Target0 gets colour, SV_Target1 gets normal.
 	
 
-
-
 */
+
+
+
 
 class DeferredBuffersClass {
 private:
@@ -53,12 +54,20 @@ public:
 	DeferredBuffersClass();
 	~DeferredBuffersClass();
 
+	/*
+	Creates RenderTargetTexture's & RenderTargetView's & ShaderResourceView's.
+	Creates DepthBuffer & DepthStencilView & Viewport.
+	*/
 	void InitializeBuffers(
 		ID3D11Device* *Device,
 		UINT TextureWidth,
 		UINT TextureHeight
 	);
 
+	/*
+	Sets all the internal RenderTargetView's to the OutputMerger stage in the GPU-pipeline.
+	Binds the internal viewport to the Rasterizer stage in the GPU-pipeline.
+	*/
 	void SetAllRenderTargets(ID3D11DeviceContext* *DeviceContext);
 
 	void ClearAllRenderTargets(

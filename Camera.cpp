@@ -78,11 +78,81 @@ void Camera::UpdateCamera(
 		FormattedStructData->view = FormattedViewMatrix;
 
 		// Alters the constantbuffer with the updated GSConstDataFloats
+		
 		AlterConstantBuffers(*GSConstantBuffer, *FormattedStructData, DeviceContext);
 	}
 }
 
 
+void Camera::UpdateCamera1(
+	TCHAR					CharacterMessage,
+	POINT					MouseCoordinates,
+	MatrixBufferStored1	*FormattedStructData,
+	ID3D11Buffer*			*GSConstantBuffer,
+	ID3D11DeviceContext*	*DeviceContext
+)
+{
+	bool NeedsToUpdate = false;
+
+	// CAMERA MOVEMENT
+	if (CharacterMessage == 'w') {
+		NeedsToUpdate = true;
+		this->MoveCameraForward();
+	}
+	else if (CharacterMessage == 'a') {
+		NeedsToUpdate = true;
+		this->MoveCameraLeft();
+	}
+	else if (CharacterMessage == 's') {
+		NeedsToUpdate = true;
+		this->MoveCameraBackward();
+	}
+	else if (CharacterMessage == 'd') {
+		NeedsToUpdate = true;
+		this->MoveCameraRight();
+	}
+	else if (CharacterMessage == 32) {
+		NeedsToUpdate = true;
+		this->MoveCameraUp();
+	}
+
+
+	// CAMERA ROTATION
+	if (MouseCoordinates.y != 0) {
+		NeedsToUpdate = true;
+		this->RotateCameraVertically(MouseCoordinates);
+	}
+	if (MouseCoordinates.x != 0) {
+		NeedsToUpdate = true;
+		this->RotateCameraHorizontally(MouseCoordinates);
+	}
+
+
+	// MISC COMMANDS - Needs to be called after movement and rotation.
+	if (CharacterMessage == 'r') {
+		NeedsToUpdate = true;
+		this->ResetCamera();
+	}
+
+
+	// IF DATA HAS BEEN UPDATED
+	if (NeedsToUpdate) {
+		// Creates the new viewMatrix
+		DirectX::XMMATRIX UnformattedViewMatrix = DirectX::XMMatrixLookToLH(
+			this->CameraPosition,
+			this->CameraDirection,
+			this->CameraUpDirection
+		);
+
+		// Updates GSConstantDataFloats with the new viewmatrix.
+		DirectX::XMFLOAT4X4 FormattedViewMatrix;
+		DirectX::XMStoreFloat4x4(&FormattedViewMatrix, UnformattedViewMatrix);
+		FormattedStructData->view = FormattedViewMatrix;
+
+		// Alters the constantbuffer with the updated GSConstDataFloats
+		AlterConstantBuffers1(*GSConstantBuffer, *FormattedStructData, DeviceContext);
+	}
+}
 
 // Moves the camera Upwards!
 void Camera::MoveCameraUp()

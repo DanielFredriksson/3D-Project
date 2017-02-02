@@ -3,7 +3,9 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include "ConstantBufferClass.hpp"
 #include "ConstantBuffers.hpp"	// Needed for GSConstantDataFloats & AlterConstantBuffers()
+
 
 
 class Camera {
@@ -28,6 +30,13 @@ public:
 		TCHAR					CharacterMessage,
 		POINT					MouseCoordinates,
 		MatrixBufferStored	*FormattedStructData,
+		ID3D11Buffer*			*GSConstantBuffer,
+		ID3D11DeviceContext*	*DeviceContext
+	);
+	void UpdateCamera1(
+		TCHAR					CharacterMessage,
+		POINT					MouseCoordinates,
+		MatrixBufferStored1	*FormattedStructData,
 		ID3D11Buffer*			*GSConstantBuffer,
 		ID3D11DeviceContext*	*DeviceContext
 	);

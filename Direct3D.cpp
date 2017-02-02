@@ -10,7 +10,62 @@ Direct3DContext::~Direct3DContext()
 {
 
 }
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PUBLIC FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+ID3D11Device* *Direct3DContext::GetDevice()
+{
+	return &this->Device;
+}
+ID3D11DeviceContext* *Direct3DContext::GetDeviceContext()
+{
+	return &this->DeviceContext;
+}
+IDXGISwapChain* *Direct3DContext::GetSwapChain()
+{
+	return &this->SwapChain;
+}
+
+
+
+
+
+void Direct3DContext::Initialize(
+	HWND	wndHandle,
+	ID3D11RenderTargetView*	*BackBufferRTV,
+	ID3D11Texture2D*		*DepthStencil,
+	ID3D11DepthStencilView*	*DepthStencilView
+)
+{
+	this->CreateDirect3DContext(
+		wndHandle,
+		BackBufferRTV,
+		DepthStencil,
+		DepthStencilView
+	);
+	this->CreateSetViewport();
+}
+
+
+
+
+
+void Direct3DContext::ReleaseAll()
+{
+	this->SwapChain->Release();
+	this->Device->Release();
+	this->DeviceContext->Release();
+}
+
+
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PRIVATE FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 void Direct3DContext::CreateDirect3DContext(
 	HWND	wndHandle,
 	ID3D11RenderTargetView*	*BackBufferRTV,
@@ -44,7 +99,8 @@ void Direct3DContext::CreateDirect3DContext(
 		&this->SwapChain,
 		&this->Device,
 		NULL,
-		&this->DeviceContext);
+		&this->DeviceContext
+	);
 
 	// ~ DepthBuffer
 	InitialiseDepthStencilAndView(DepthStencil, DepthStencilView);  // Has to be called after we've created Device,DeviceContext and SwapChain // Has to be called before we set render targets
@@ -67,7 +123,7 @@ void Direct3DContext::CreateDirect3DContext(
 }
 
 
-void Direct3DContext::CreateViewport()
+void Direct3DContext::CreateSetViewport()
 {
 	D3D11_VIEWPORT vp;
 	vp.Width = (float)SCREEN_WIDTH;
@@ -110,9 +166,3 @@ void Direct3DContext::InitialiseDepthStencilAndView(
 	// DepthStencilState is default since we're not implementing it.
 }
 
-void Direct3DContext::Release()
-{
-	this->SwapChain->Release();
-	this->Device->Release();
-	this->DeviceContext->Release();
-}

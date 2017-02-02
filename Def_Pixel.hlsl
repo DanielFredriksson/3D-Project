@@ -10,8 +10,8 @@
 
 struct Deferred_PixelShader_Input
 {
-	// Position : SV_POSITION
-	// Normal : 
+	float4 Position : SV_POSITION;
+	float3 Normal : NORMAL;
 	// TextureCoordinate
 };
 
@@ -19,18 +19,23 @@ struct Deferred_PixelShader_Input
 struct RenderTarget_Input
 {
 	float4 colour : SV_Target0;
-	float4 normal : SV_Target1;
+	float3 normal : SV_Target1;
 };
 
 
 RenderTarget_Input DEF_PS_main(Deferred_PixelShader_Input input) : SV_Target
 {
 	RenderTarget_Input output;
-
+	
+	output.colour = input.Position;
+	output.normal = input.Normal;
 	// Sample texture coordinates
 	// --- output.colour = shaderTexture.Sample(SampleTypeWrap, input.textureCoordinate);
 
 	// --- output.normal = float4(input.normal, 0.0f);
 
 	return output;
+
+	
+
 }; // ';' necessary?

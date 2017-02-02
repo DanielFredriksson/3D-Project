@@ -84,7 +84,6 @@ void InitializeConstantMatrices(MatrixBufferLoaded *constData)	///Parameters are
 	constData->RotationY90 = Y_RotationMatrix;
 
 	constData->FlipMatrixY = FlipY;
-
 	//constData->halfXYZ = tempHalf;
 };
 
