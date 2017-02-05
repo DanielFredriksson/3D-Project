@@ -7,14 +7,17 @@ DeferredShaderClass::DeferredShaderClass()
 	this->VertexShader = nullptr;
 	this->VertexLayout = nullptr;
 	this->SamplerStateWrap = nullptr;
-	this->MatrixBuffer = nullptr;
 }
 DeferredShaderClass::~DeferredShaderClass()
 {
 
 }
 
-
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PUBLIC FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
 void DeferredShaderClass::InitialiseShaders(ID3D11Device* *Device)
@@ -86,22 +89,6 @@ void DeferredShaderClass::InitialiseShaders(ID3D11Device* *Device)
 	hr = (*Device)->CreateSamplerState(&Sampler_Description, &this->SamplerStateWrap);
 	if (FAILED(hr))
 		MessageBox(NULL, L"Failed to create SamplerState.", L"ERROR: 'InitialiseShaders() - DeferredShaderClass'", MB_OK);
-
-	
-	//----------------------------------- Matrix Constant Buffer
-	D3D11_BUFFER_DESC MatrixBuffer_Description;
-	MatrixBuffer_Description.Usage = D3D11_USAGE_DYNAMIC;	// Can be Written-to by the CPU and read-by the GPU
-	MatrixBuffer_Description.ByteWidth = sizeof(MatrixBufferStored);	// Bytesize.
-	MatrixBuffer_Description.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// [What kind of buffer?]
-	MatrixBuffer_Description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// In accordance to D3D_USAGE_DYNAMIC.
-	MatrixBuffer_Description.MiscFlags = 0;				// Extra-Fancy settings.
-	MatrixBuffer_Description.StructureByteStride = 0;	// Only relevant if it's a 'Structured Buffer' ( A buffer that contains elements of equal sizes )
-
-	hr = (*Device)->CreateBuffer(&MatrixBuffer_Description, NULL, &this->MatrixBuffer);
-	if (FAILED(hr))
-		MessageBox(NULL, L"Failed to create MatrixBuffer.", L"ERROR: 'InitialiseShaders() - DeferredShaderClass'", MB_OK);
-
-
 }
 
 
@@ -111,76 +98,36 @@ void DeferredShaderClass::ReleaseAll()
 	this->VertexShader->Release();
 	this->VertexLayout->Release();
 	this->SamplerStateWrap->Release();
-	this->MatrixBuffer->Release();
 }
 
 
-void DeferredShaderClass::SetShaderParameters(
-	ID3D11DeviceContext*		*DeviceContext,
-//	ID3D11ShaderResourceView*	*texture,
-	DirectX::XMFLOAT4X4			FormattedWorldMatrix,
-	DirectX::XMFLOAT4X4			FormattedViewMatrix,
-	DirectX::XMFLOAT4X4			FormattedProjectionMatrix
-)
-{
-	// Map the constant buffer so it can be written to.
-	MatrixBufferStored *DataPointer;
-	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	HRESULT hr = (*DeviceContext)->Map(this->MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-	if (FAILED(hr))
-		MessageBox(NULL, L"Failed to Map.", L"ERROR: 'SetShaderParameters()' - DeferredShaderClass", MB_OK);
-	DataPointer = (MatrixBufferStored*)MappedResource.pData;
 
-	// Do shit.
-	DataPointer->world = FormattedWorldMatrix;
-	DataPointer->view = FormattedViewMatrix;
-	DataPointer->projection = FormattedProjectionMatrix;
-
-	// Unmap
-	(*DeviceContext)->Unmap(this->MatrixBuffer, 0);
-
-	// Set the position of the constant buffer in the vertex shader
-	int BufferNumber = 0;
-
-	(*DeviceContext)->VSSetConstantBuffers(BufferNumber, 1, &this->MatrixBuffer);
-
-	//(*DeviceContext)->PSSetShaderResources(0, 1, texture);
-}
-
-
-void DeferredShaderClass::RenderShader(ID3D11DeviceContext* *DeviceContext, int VerticeCount)
+void DeferredShaderClass::SetShadingContext(ID3D11DeviceContext* *DeviceContext)
 {
 	// Set VertexInputLayout
 	(*DeviceContext)->IASetInputLayout(this->VertexLayout);
 
 	// Set Vertex and Pixel shaders that will be used to render
-	(*DeviceContext)->VSSetShader(this->VertexShader, NULL, 0);
-	(*DeviceContext)->PSSetShader(this->PixelShader, NULL, 0);
+	(*DeviceContext)->VSSetShader(this->VertexShader, nullptr, 0);
+	(*DeviceContext)->GSSetShader(nullptr, nullptr, 0);
+	(*DeviceContext)->PSSetShader(this->PixelShader, nullptr, 0);
 
 	// Set sampler states in the pixel shader
 	(*DeviceContext)->PSSetSamplers(0, 1, &this->SamplerStateWrap);
+}
 
+
+
+
+void DeferredShaderClass::RenderShader(ID3D11DeviceContext* *DeviceContext, int VerticeCount)
+{
 	// Render the geometry
 	(*DeviceContext)->Draw(VerticeCount, 0);
 }
 
 
-void DeferredShaderClass::Render(
-	ID3D11DeviceContext*		*DeviceContext,
-//	ID3D11ShaderResourceView*	*texture,
-	DirectX::XMFLOAT4X4			FormattedWorldMatrix,
-	DirectX::XMFLOAT4X4			FormattedViewMatrix,
-	DirectX::XMFLOAT4X4			FormattedProjectionMatrix,
-	int							VerticeCount
-)
-{
-	this->SetShaderParameters(
-		DeviceContext,
-//		texture,
-		FormattedWorldMatrix,
-		FormattedViewMatrix,
-		FormattedProjectionMatrix
-	);
-
-	this->RenderShader(DeviceContext, VerticeCount);
-}
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									PRIVATE FUNCTIONS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

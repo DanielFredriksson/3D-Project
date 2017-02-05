@@ -4,58 +4,63 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
+#include <iterator>
+#include <codecvt>
+#include <locale>
 
 #include "Globals.hpp"
-
-
-
-// NECESSARY DATA STRUCTURES
-
-struct objData
-{
-	DirectX::XMFLOAT3 vertex;
-	DirectX::XMFLOAT3 normal;
-};
-
-struct calcData
-{
-	unsigned long *indices;
-	int vertexCount;
-	int indexCount;
-};
+#include "Object.hpp"
 
 
 
 
 
-class objLoader
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									NECESSARY STRUCTS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+
+
+
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//																					//
+//									OBJECTLOADER CLASS								//
+//																					//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+class objLoaderClass
 {
 private:
-	objData* bufferData;
-	calcData CalcRelatedData;
+	objDataClass* bufferData;
+	calcDataClass CalcRelatedData;
 
-	int normal_count;
-	int face_count;
 
-	DirectX::XMFLOAT3 *faces;
-	DirectX::XMVECTOR *vectorVertices;
-	DirectX::XMVECTOR *vectorNormals;
-	DirectX::XMVECTOR vector1, vector2, vector3;	// Vectors used for FACE calculations
+	DirectX::XMFLOAT3 *temp_vertices;
+	DirectX::XMFLOAT2 *temp_texCoords;
+	DirectX::XMFLOAT3 *temp_normals;
 
 	std::ifstream input_file;
 
 public:
-	objLoader();
-	~objLoader();
+	objLoaderClass();
+	~objLoaderClass();
 
-	void importObjFile(std::string fileName);
+	/* ------------- COMMENTS -------------
+	ImportObjectFile imports all data from the Obj/Mtl-files which correspond
+	to 'fileName' and inserts it into the 'Object' parameter.
+	*/
+	void importObjFile(ObjectClass *Object);
 
-	objData* *get_objData();
-	calcData *get_calcData();
+	objDataClass* *get_objData();
+	calcDataClass *get_calcData();
 };
 
 #endif

@@ -57,8 +57,7 @@ ID3D11DepthStencilView* *BasicShaderClass::GetDepthStencilView()
 void BasicShaderClass::Render(
 	ID3D11DeviceContext*	*DeviceContext,
 	ID3D11Buffer*			*VertexBuffer,
-	ID3D11Buffer*			*IndexBuffer,
-	calcData				*CalcRelatedData
+	calcDataClass			*CalcRelatedData
 )
 {
 	static bool hasRun = false;
@@ -68,21 +67,27 @@ void BasicShaderClass::Render(
 	if (!hasRun) {
 
 		this->SetShadersAndShaderResources(DeviceContext);
-
 		this->DefineInputAssembler(
 			DeviceContext,
-			VertexBuffer,
-			IndexBuffer
+			VertexBuffer
 		);
+
 	}
 	else {
 
 	}
 
 
-	(*DeviceContext)->DrawIndexed(CalcRelatedData->indexCount, 0, 0);
-	//(*DeviceContext)->Draw(CalcRelatedData->vertexCount, 0);
-	//(*DeviceContext)->Draw(VERTICE_COUNT_TRIANGLES, 0);
+	UINT32 vertexSize = (sizeof(DirectX::XMFLOAT3) * 2 + sizeof(DirectX::XMFLOAT2));	//Data amount per INDIVIDUAL VERTEX
+	UINT32 offset = 0;
+	(*DeviceContext)->IASetVertexBuffers(
+		0,
+		1,
+		VertexBuffer,
+		&vertexSize,
+		&offset
+	);
+	(*DeviceContext)->Draw((CalcRelatedData->faceCount * 3), 0);
 
 	// DrawIndexed is used when you have an index buffer along side your vertex buffer. However with this
 	// system, drawing hard edges is impossible. Instead, by using the Draw functions instead, you can
@@ -104,17 +109,24 @@ void BasicShaderClass::Clear(
 	(*DeviceContext)->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
 }
 
+
+/* ------------- COMMENTS -------------
+Only sets primitive topology and the internal VertexLayout.
+*/
 void BasicShaderClass::DefineInputAssembler(
 	ID3D11DeviceContext*	*DeviceContext,
-	ID3D11Buffer*			*VertexBuffer,
-	ID3D11Buffer*			*IndexBuffer
+	ID3D11Buffer*			*VertexBuffer
 )
 {
-	UINT32 vertexSize = sizeof(DirectX::XMFLOAT3) * 2;	//Data amount per INDIVIDUAL VERTEX
+	UINT32 vertexSize = (sizeof(DirectX::XMFLOAT3) * 2 + sizeof(DirectX::XMFLOAT2));	//Data amount per INDIVIDUAL VERTEX
 	UINT32 offset = 0;
-
-	(*DeviceContext)->IASetVertexBuffers(0, 1, VertexBuffer, &vertexSize, &offset);
-	(*DeviceContext)->IASetIndexBuffer(*IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	(*DeviceContext)->IASetVertexBuffers(
+		0,
+		1,
+		VertexBuffer,
+		&vertexSize,
+		&offset
+	);
 	(*DeviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	(*DeviceContext)->IASetInputLayout(this->VertexLayout);
 }
@@ -144,7 +156,8 @@ void BasicShaderClass::InitialiseShaders(ID3D11Device* *Device)
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	hr = (*Device)->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &this->VertexLayout);
 
@@ -222,4 +235,3 @@ void BasicShaderClass::SetShadersAndShaderResources(ID3D11DeviceContext* *Device
 	(*DeviceContext)->GSSetShader(this->GeometryShader, nullptr, 0);
 	(*DeviceContext)->PSSetShader(this->PixelShader, nullptr, 0);
 }
-

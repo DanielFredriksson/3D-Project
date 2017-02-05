@@ -1,15 +1,18 @@
 struct GSSceneIn
 {
 	float4 Pos : SV_POSITION;
+	float2 uv :	TEXCOORD;
 	float4 Normal : NORMAL;
 };
 
 struct PSSceneIn
 {
 	float4 Pos : SV_POSITION;
+	float2 uv : TEXCOORD;
 	float4 Normal : NORMAL;
 
-	float3 worldPos : POSITION0;
+	float3 worldPos : WORLDPOSITION;
+	float3 Kd : KDVALUES;
 };
 
 cbuffer GSConstantBuffer : register(b0)
@@ -20,6 +23,8 @@ cbuffer GSConstantBuffer : register(b0)
 
 	float4x4 X_RotationMatrix;
 	float4x4 Y_RotationMatrix;
+
+	float4 Kd;
 };
 
 [maxvertexcount(3)]
@@ -37,7 +42,10 @@ void GS_main(triangle GSSceneIn triangle_input[3], inout TriangleStream<PSSceneI
 		output.Pos = mul(view, output.Pos);
 		output.Pos = mul(projection, output.Pos);
 
+		output.uv = triangle_input[i].uv;
 		output.Normal = triangle_input[i].Normal;
+
+		output.Kd = Kd.xyz;
 
 		OutputStream.Append(output);
 	}

@@ -10,6 +10,12 @@ private:
 	ID3D11Device* Device;
 	ID3D11DeviceContext* DeviceContext;
 
+	D3D11_VIEWPORT Viewport;
+
+	/* ------------- COMMENTS -------------
+	Sets the BackBufferRTV as the only RenderTarget.
+	*/
+
 public:
 	Direct3DContext();
 	~Direct3DContext();
@@ -30,10 +36,14 @@ public:
 	);
 
 	/* ------------- COMMENTS -------------
-	Creates a viewport according to global SCREEN_WIDTH/HEIGHT and sets
-	it to the rasterizer stage.
+	Initializes the internal viewport with data.
 	*/
-	void CreateSetViewport();
+	void InitializeViewport();
+	/* ------------- COMMENTS -------------
+	Sets the internal viewport to the Rasterizer stage.
+	*/
+	void SetViewport();
+
 
 
 
@@ -52,6 +62,15 @@ public:
 		ID3D11DepthStencilView*	*DepthStencilView
 	);
 
+	/* ------------- COMMENTS -------------
+	Changes the RenderTargets back to only the original
+	BackBufferRTV.
+	*/
+	void ResetRenderTarget(
+		ID3D11RenderTargetView* *BackBufferRTV,
+		ID3D11DepthStencilView* *DepthStencilView
+	);
+	void ResetViewPort();
 
 	void ReleaseAll();
 

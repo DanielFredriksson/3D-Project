@@ -4,7 +4,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
-#include "ConstantBuffers.hpp" // Class needs access to GSConstantDataMatrices
+#include "ConstantBufferClass.hpp"	// Needs MatrixBufferStored
 
 // CURRENTLY NO TEXTURES - TO CHANGE, EDIT:
 //	InitialiseShaders()		- "TEXCOORD"
@@ -21,42 +21,13 @@
 
 class DeferredShaderClass {
 private:
-	struct MatrixBuffer
-	{
-		// world
-		// view
-		// projection
-	};
 
-	ID3D11PixelShader* PixelShader;
 	ID3D11VertexShader* VertexShader;
 	ID3D11InputLayout*	VertexLayout;
-
+	ID3D11PixelShader*	PixelShader;
 	ID3D11SamplerState*	SamplerStateWrap; // Wraps Address.X
-	ID3D11Buffer*		MatrixBuffer;
 
 
-	/* ------------- COMMENTS -------------
-	This function maps updates the internal MatrixBuffer with world, view, projection
-	through Map/Unmap.
-	Then sets the internal MatrixBuffer as a ConstantBuffer to the current VertexShader.
-	Also sets the recieved ShaderResourceView-texture to the current PixelShader.
-	*/
-	void SetShaderParameters(
-		ID3D11DeviceContext*		*DeviceContext,
-	//	ID3D11ShaderResourceView*	*texture,
-		DirectX::XMFLOAT4X4			FormattedWorldMatrix,
-		DirectX::XMFLOAT4X4			FormattedViewMatrix,
-		DirectX::XMFLOAT4X4			FormattedProjectionMatrix
-	);
-
-	/* ------------- COMMENTS -------------
-	Replaces the current VertexLayout with the internal VertexLayout.
-	Replaces both Pixel/VertexShader.
-	Sets the internal SamplerState to the current(the internal) PixelShader.
-	Then calls DeviceContext->Draw(VerticeCount, 0)
-	*/
-	void RenderShader(ID3D11DeviceContext* *DeviceContext, int VerticeCount);
 
 public:
 	DeferredShaderClass();
@@ -70,20 +41,39 @@ public:
 	void InitialiseShaders(ID3D11Device* *Device);
 
 	/* ------------- COMMENTS -------------
-	Simply sets the shader parameters then renders the shader.
-	SetShaderParameters() + RenderShader()	
+	Updates the internal MatrixBuffer with values from the matrices given as input and
+	sets the internal matrixbuffer to the VertexShader.
+	After that it sets the internal VertexLayout, VertexShader, PixelShader & SamplerState to
+	the current pipeline.
+	Finally calls Draw();
 	*/
-	void Render(
-		ID3D11DeviceContext*		*DeviceContext,
-	//	ID3D11ShaderResourceView*	*texture,
-		DirectX::XMFLOAT4X4			FormattedWorldMatrix,
-		DirectX::XMFLOAT4X4			FormattedViewMatrix,
-		DirectX::XMFLOAT4X4			FormattedProjectionMatrix,
-		int							VerticeCount
-	);
+
+
 
 	/* ------------- COMMENTS -------------
-	
+	Sets these to the pipeline:
+	VertexLayout.
+	VertexShader.
+	PixelShader.
+	SamplerState.
+	*/
+	void SetShadingContext(ID3D11DeviceContext* *DeviceContext);
+
+
+
+	/* ------------- COMMENTS -------------
+	Replaces the current VertexLayout with the internal VertexLayout.
+	Replaces both Pixel/VertexShader.
+	Sets the internal SamplerState to the current(the internal) PixelShader.
+	Then calls DeviceContext->Draw(VerticeCount, 0)
+	*/
+	void RenderShader(ID3D11DeviceContext* *DeviceContext, int VerticeCount);
+
+
+
+
+
+	/* ------------- COMMENTS -------------
 	*/
 	void ReleaseAll();
 };

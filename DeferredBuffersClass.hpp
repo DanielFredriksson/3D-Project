@@ -45,8 +45,7 @@ private:
 	ID3D11Texture2D* DepthStencilBuffer;
 	ID3D11DepthStencilView* DepthStencilView;
 
-	// Not sure atm.
-	D3D11_VIEWPORT ViewPort;
+
 
 
 public:
@@ -54,19 +53,19 @@ public:
 	DeferredBuffersClass();
 	~DeferredBuffersClass();
 
-	/*
+	/* ------------- COMMENTS -------------
 	Creates RenderTargetTexture's & RenderTargetView's & ShaderResourceView's.
 	Creates DepthBuffer & DepthStencilView & Viewport.
 	*/
 	void InitializeBuffers(
 		ID3D11Device* *Device,
-		UINT TextureWidth,
-		UINT TextureHeight
+		UINT ScreenWidth,
+		UINT ScreenHeight
 	);
 
-	/*
+	/* ------------- COMMENTS -------------
 	Sets all the internal RenderTargetView's to the OutputMerger stage in the GPU-pipeline.
-	Binds the internal viewport to the Rasterizer stage in the GPU-pipeline.
+	The order of the RenderTargets in the array is the order of "SV_TargetX".
 	*/
 	void SetAllRenderTargets(ID3D11DeviceContext* *DeviceContext);
 

@@ -4,11 +4,14 @@
 //
 //
 //'
-struct MatrixStruct
+cbuffer GSConstantBuffer : register(b0)
 {
-	// float4x4 world;
-	// float4x4 view;
-	// float4x4 projection;
+	float4x4 world;
+	float4x4 view;
+	float4x4 projection;
+
+	float4x4 X_RotationMatrix;
+	float4x4 Y_RotationMatrix;
 };
 
 struct Deferred_VertexShader_Input
@@ -21,7 +24,7 @@ struct Deferred_VertexShader_Input
 struct Deferred_PixelShader_Input
 {
 	float4 Position : SV_POSITION;
-	float3 Normal : NORMAL;
+	float4 Normal : NORMAL;
 	// TextureCoordinate
 };
 
@@ -31,7 +34,7 @@ Deferred_PixelShader_Input DEF_VS_main(Deferred_VertexShader_Input input)
 	Deferred_PixelShader_Input output;
 
 	output.Position = float4(input.Position, 1);
-	output.Normal = input.Normal;
+	output.Normal = float4(input.Normal, 0);
 
 	// output.texcoord = input.texcoord;
 

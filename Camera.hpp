@@ -4,15 +4,15 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "ConstantBufferClass.hpp"
-#include "ConstantBuffers.hpp"	// Needed for GSConstantDataFloats & AlterConstantBuffers()
+
 
 
 
 class Camera {
 private:
-	float CameraMovementSpeed = 1.0;
+	float CameraMovementSpeed = 0.1;
 	float CameraRotationSpeed = 0.02;
-	DirectX::XMVECTOR CameraStartPosition = { 0, 0, -20 };
+	DirectX::XMVECTOR CameraStartPosition = { 0, 0, -2 };
 
 public:
 	DirectX::XMVECTOR CameraPosition;
@@ -36,7 +36,7 @@ public:
 	void UpdateCamera1(
 		TCHAR					CharacterMessage,
 		POINT					MouseCoordinates,
-		MatrixBufferStored1	*FormattedStructData,
+		MatrixBufferStored	*FormattedStructData,
 		ID3D11Buffer*			*GSConstantBuffer,
 		ID3D11DeviceContext*	*DeviceContext
 	);

@@ -46,7 +46,8 @@ void Direct3DContext::Initialize(
 		DepthStencil,
 		DepthStencilView
 	);
-	this->CreateSetViewport();
+	this->InitializeViewport();
+	this->SetViewport();
 }
 
 
@@ -118,22 +119,30 @@ void Direct3DContext::CreateDirect3DContext(
 
 		// set the render target as the back buffer
 		this->DeviceContext->OMSetRenderTargets(1, BackBufferRTV, *DepthStencilView);
-
 	}
 }
 
 
-void Direct3DContext::CreateSetViewport()
+
+
+
+void Direct3DContext::InitializeViewport()
 {
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)SCREEN_WIDTH;
-	vp.Height = (float)SCREEN_HEIGHT;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	this->DeviceContext->RSSetViewports(1, &vp);
+	this->Viewport.Width = (float)SCREEN_WIDTH;
+	this->Viewport.Height = (float)SCREEN_HEIGHT;
+	this->Viewport.MinDepth = 0.0f;
+	this->Viewport.MaxDepth = 1.0f;
+	this->Viewport.TopLeftX = 0;
+	this->Viewport.TopLeftY = 0;
 }
+void Direct3DContext::SetViewport()
+{
+	this->DeviceContext->RSSetViewports(1, &this->Viewport);
+}
+
+
+
+
 
 void Direct3DContext::InitialiseDepthStencilAndView(
 	ID3D11Texture2D*		*DepthStencil,
@@ -166,3 +175,13 @@ void Direct3DContext::InitialiseDepthStencilAndView(
 	// DepthStencilState is default since we're not implementing it.
 }
 
+
+
+
+void Direct3DContext::ResetRenderTarget(
+	ID3D11RenderTargetView* *BackBufferRTV,
+	ID3D11DepthStencilView* *DepthStencilView
+)
+{
+	this->DeviceContext->OMSetRenderTargets(1, BackBufferRTV, *DepthStencilView);
+}

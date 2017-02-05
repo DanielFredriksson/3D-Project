@@ -9,7 +9,6 @@ DeferredBuffersClass::DeferredBuffersClass()
 	}
 	this->DepthStencilBuffer = nullptr;
 	this->DepthStencilView = nullptr;
-	this->ViewPort = { 0 };
 }
 DeferredBuffersClass::~DeferredBuffersClass()
 {
@@ -20,8 +19,9 @@ DeferredBuffersClass::~DeferredBuffersClass()
 
 void DeferredBuffersClass::InitializeBuffers(
 	ID3D11Device* *Device,
-	UINT TextureWidth,
-	UINT TextureHeight)
+	UINT ScreenWidth,
+	UINT ScreenHeight
+)
 {
 	/*
 	The RenderTargetTextureArray's are the containers for the data which the 
@@ -42,8 +42,8 @@ void DeferredBuffersClass::InitializeBuffers(
 	// Description for all RenderTargetTexture's
 	D3D11_TEXTURE2D_DESC Texture2D_Description;
 	ZeroMemory(&Texture2D_Description, sizeof(Texture2D_Description));
-	Texture2D_Description.Width = TextureWidth;
-	Texture2D_Description.Height = TextureHeight;
+	Texture2D_Description.Width = ScreenWidth;
+	Texture2D_Description.Height = ScreenHeight;
 	Texture2D_Description.MipLevels = 0;	// '0' generates a full set of subtextures.
 	Texture2D_Description.ArraySize = 1;	// We're only using '1' texture.
 	Texture2D_Description.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;	// The datatype per pixel, here with four components.
@@ -106,8 +106,8 @@ void DeferredBuffersClass::InitializeBuffers(
 	// Description for the DepthBuffer
 	D3D11_TEXTURE2D_DESC DepthBuffer_Description;
 	ZeroMemory(&DepthBuffer_Description, sizeof(DepthBuffer_Description));
-	DepthBuffer_Description.Width = TextureWidth;
-	DepthBuffer_Description.Height = TextureHeight;
+	DepthBuffer_Description.Width = ScreenWidth;
+	DepthBuffer_Description.Height = ScreenHeight;
 	DepthBuffer_Description.MipLevels = 1;
 	DepthBuffer_Description.ArraySize = 1;
 	DepthBuffer_Description.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -142,13 +142,6 @@ void DeferredBuffersClass::InitializeBuffers(
 	if (FAILED(hr))
 		MessageBox(NULL, L"Failed to Create a DepthStencilView'.", L"ERROR: 'InitialiseBuffers() - DeferredBuffersClass'", MB_OK);
 
-	// Setting up the viewport
-	this->ViewPort.Width = float(TextureWidth);
-	this->ViewPort.Height = float(TextureHeight);
-	this->ViewPort.MaxDepth = 1.0f;
-	this->ViewPort.MinDepth = 0.0f;
-	this->ViewPort.TopLeftX = 0.0f;
-	this->ViewPort.TopLeftY = 0.0f;
 }
 
 void DeferredBuffersClass::SetAllRenderTargets(ID3D11DeviceContext* *DeviceContext)
@@ -158,8 +151,6 @@ void DeferredBuffersClass::SetAllRenderTargets(ID3D11DeviceContext* *DeviceConte
 		this->RenderTargetViewArray,
 		this->DepthStencilView
 	);
-
-	(*DeviceContext)->RSSetViewports(1, &this->ViewPort);
 }
 
 void DeferredBuffersClass::ClearAllRenderTargets(
@@ -177,10 +168,10 @@ void DeferredBuffersClass::ClearAllRenderTargets(
 
 	// Sets up the background color
 	float colour[4];
-	colour[1] = ClearColor_Red;
-	colour[2] = ClearColor_Blue;
-	colour[3] = ClearColor_Green;
-	colour[4] = ClearColor_Alpha;
+	colour[0] = ClearColor_Red;
+	colour[1] = ClearColor_Blue;
+	colour[2] = ClearColor_Green;
+	colour[3] = ClearColor_Alpha;
 
 	// Clears all RenderTarget's
 	for (int i = 0; i < BUFFER_COUNT; i++) {
@@ -190,10 +181,11 @@ void DeferredBuffersClass::ClearAllRenderTargets(
 	// Clears the DepthStencilView.
 	(*DeviceContext)->ClearDepthStencilView(
 		this->DepthStencilView,
-		D3D11_CLEAR_DEPTH,
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0
 	);
+
 }
 
 void DeferredBuffersClass::ReleaseAll()
@@ -216,6 +208,4 @@ void DeferredBuffersClass::ReleaseAll()
 	
 	this->DepthStencilView->Release();
 	this->DepthStencilView = nullptr;
-
-	this->ViewPort = { 0 };
 }

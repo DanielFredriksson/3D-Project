@@ -4,7 +4,6 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
-#include "FrequentFunctions.hpp"	// Currently here for Clear()
 #include "Globals.hpp"				// Currently here for VERTICE_COUNT_TRIANGLES in Render();
 #include "objLoader.hpp"
 
@@ -32,8 +31,7 @@ public:
 	void Render(
 		ID3D11DeviceContext*	*DeviceContext,
 		ID3D11Buffer*			*VertexBuffer,
-		ID3D11Buffer*			*IndexBuffer,
-		calcData				*CalcRelatedData
+		calcDataClass			*CalcRelatedData
 	);
 	void Clear(
 		ID3D11DeviceContext*	*DeviceContext,
@@ -44,9 +42,8 @@ public:
 
 	void SetShadersAndShaderResources(ID3D11DeviceContext* *DeviceContext);
 	void DefineInputAssembler(
-		ID3D11DeviceContext*	*DeviceContext,				// Is affected by a difference in VertexSize.
-		ID3D11Buffer*			*VertexBuffer,
-		ID3D11Buffer*			*IndexBuffer
+		ID3D11DeviceContext*	*DeviceContext,
+		ID3D11Buffer*			*VertexBuffer
 	);
 
 

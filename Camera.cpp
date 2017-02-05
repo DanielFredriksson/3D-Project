@@ -87,7 +87,7 @@ void Camera::UpdateCamera(
 void Camera::UpdateCamera1(
 	TCHAR					CharacterMessage,
 	POINT					MouseCoordinates,
-	MatrixBufferStored1	*FormattedStructData,
+	MatrixBufferStored	*FormattedStructData,
 	ID3D11Buffer*			*GSConstantBuffer,
 	ID3D11DeviceContext*	*DeviceContext
 )
@@ -150,7 +150,7 @@ void Camera::UpdateCamera1(
 		FormattedStructData->view = FormattedViewMatrix;
 
 		// Alters the constantbuffer with the updated GSConstDataFloats
-		AlterConstantBuffers1(*GSConstantBuffer, *FormattedStructData, DeviceContext);
+		AlterConstantBuffers(*GSConstantBuffer, *FormattedStructData, DeviceContext);
 	}
 }
 
