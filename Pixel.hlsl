@@ -1,5 +1,5 @@
-//Texture2D txDiffuse : register(t0);
-//SamplerState Sampler : register(s0);
+Texture2D txDiffuse : register(t0);
+SamplerState Sampler : register(s0);
 
 struct PSSceneIn
 {
@@ -29,8 +29,8 @@ float4 PS_main(PSSceneIn input) : SV_Target
 	float3 Pos_To_Light;
 	float DotProd;
 
-//float3 Color = txDiffuse.Sample(Sampler, input.uv).xyz;
-	float3 Color = { 1.0f, 1.0f, 1.0f };
+	float3 Color = txDiffuse.Sample(Sampler, input.uv).xyz;
+	//float3 Color = { 1.0f, 1.0f, 1.0f };
 
 //Colour = Colour + input.Normal.xyz;
 //DOT PRODUCT CALCULATIONS

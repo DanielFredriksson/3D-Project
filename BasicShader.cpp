@@ -9,6 +9,7 @@ BasicShaderClass::BasicShaderClass()
 	this->BackBufferRTV = nullptr;
 	this->DepthStencil = nullptr;
 	this->DepthStencilView = nullptr;
+	this->SamplerState = nullptr;
 }
 BasicShaderClass::~BasicShaderClass()
 {
@@ -22,6 +23,7 @@ BasicShaderClass::~BasicShaderClass()
 void BasicShaderClass::Initialize(ID3D11Device* *Device)
 {
 	this->InitialiseShaders(Device);
+	this->InitializeSamplerState(Device);
 }
 
 void BasicShaderClass::ReleaseAll()
@@ -32,6 +34,7 @@ void BasicShaderClass::ReleaseAll()
 	this->BackBufferRTV->Release();
 	this->DepthStencil->Release();
 	this->DepthStencilView->Release();
+	this->SamplerState->Release();
 }
 
 
@@ -55,14 +58,14 @@ ID3D11DepthStencilView* *BasicShaderClass::GetDepthStencilView()
 }
 
 void BasicShaderClass::Render(
-	ID3D11DeviceContext*	*DeviceContext,
-	ID3D11Buffer*			*VertexBuffer,
-	calcDataClass			*CalcRelatedData
+	ID3D11DeviceContext*		*DeviceContext,
+	ID3D11Buffer*				*VertexBuffer,
+	ObjectDataClass				*ObjectData,
+	ID3D11ShaderResourceView*	*ShaderResourceView
+
 )
 {
 	static bool hasRun = false;
-	this->Clear(DeviceContext, this->DepthStencilView);
-
 
 	if (!hasRun) {
 
@@ -78,6 +81,8 @@ void BasicShaderClass::Render(
 	}
 
 
+	(*DeviceContext)->PSSetShaderResources(0, 1, ShaderResourceView);
+	
 	UINT32 vertexSize = (sizeof(DirectX::XMFLOAT3) * 2 + sizeof(DirectX::XMFLOAT2));	//Data amount per INDIVIDUAL VERTEX
 	UINT32 offset = 0;
 	(*DeviceContext)->IASetVertexBuffers(
@@ -87,7 +92,7 @@ void BasicShaderClass::Render(
 		&vertexSize,
 		&offset
 	);
-	(*DeviceContext)->Draw((CalcRelatedData->faceCount * 3), 0);
+	(*DeviceContext)->Draw((ObjectData->faceCount * 3), 0);
 
 	// DrawIndexed is used when you have an index buffer along side your vertex buffer. However with this
 	// system, drawing hard edges is impossible. Instead, by using the Draw functions instead, you can
@@ -227,6 +232,24 @@ void BasicShaderClass::InitialiseShaders(ID3D11Device* *Device)
 
 }
 
+void BasicShaderClass::InitializeSamplerState(ID3D11Device* *Device)
+{
+	D3D11_SAMPLER_DESC SamplerState_Description;
+
+	SamplerState_Description.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	SamplerState_Description.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	SamplerState_Description.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	SamplerState_Description.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	SamplerState_Description.MipLODBias = 0.0f;
+	SamplerState_Description.MaxAnisotropy = 1.0f;
+	SamplerState_Description.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	SamplerState_Description.BorderColor[4] = (1.0f, 1.0f, 1.0f, 1.0f);
+	SamplerState_Description.MinLOD = -3.402823466e+38F;
+	SamplerState_Description.MaxLOD = 3.402823466e+38F;
+
+	(*Device)->CreateSamplerState(&SamplerState_Description, &this->SamplerState);
+}
+
 void BasicShaderClass::SetShadersAndShaderResources(ID3D11DeviceContext* *DeviceContext)
 {
 	(*DeviceContext)->VSSetShader(this->VertexShader, nullptr, 0);
@@ -234,4 +257,6 @@ void BasicShaderClass::SetShadersAndShaderResources(ID3D11DeviceContext* *Device
 	(*DeviceContext)->DSSetShader(nullptr, nullptr, 0);
 	(*DeviceContext)->GSSetShader(this->GeometryShader, nullptr, 0);
 	(*DeviceContext)->PSSetShader(this->PixelShader, nullptr, 0);
+
+	(*DeviceContext)->PSSetSamplers(0, 1, &this->SamplerState);
 }

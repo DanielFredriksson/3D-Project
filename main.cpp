@@ -15,10 +15,11 @@
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	CoInitialize(NULL);	// "Initialize COM Library", needed for 'CreateWICTextureFromFile'
 
-	// ObjectHandlerClass has not implemented deletion of ObjectArray
-	//
-
+	// * ObjectHandlerClass has not implemented deletion of ObjectArray
+	// * BasicShader->Render()'s SetShaderAndSHaderResources+DefineINput assembler should be another function.
+	// Inputclass needs to release all textureloaders.
 
 
 
@@ -27,7 +28,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	Application.Initialize(hInstance);
 
 	
-
+	// objData		->		VerticeData
+	// calcData		->		objData
+	
 
 
 	//Application.SetObjectData();

@@ -39,8 +39,8 @@
 class objLoaderClass
 {
 private:
-	objDataClass* bufferData;
-	calcDataClass CalcRelatedData;
+	VertexDataClass* bufferData;
+	ObjectDataClass ObjectData;
 
 
 	DirectX::XMFLOAT3 *temp_vertices;
@@ -59,8 +59,11 @@ public:
 	*/
 	void importObjFile(ObjectClass *Object);
 
-	objDataClass* *get_objData();
-	calcDataClass *get_calcData();
+	/* ------------- COMMENTS -------------
+	Returns all the vertices of an object (array).
+	*/
+	VertexDataClass* *getVerticeData();
+	ObjectDataClass *getObjectData();
 };
 
 #endif

@@ -213,7 +213,7 @@ void objLoaderClass::importObjFile(ObjectClass *Object)
 			{
 				input_file >> Object->getObjectData()->faceCount;
 
-				(*Object->getVerticeData()) = new objDataClass[(Object->getObjectData()->faceCount) * 3];
+				(*Object->getVerticeData()) = new VertexDataClass[(Object->getObjectData()->faceCount) * 3];
 				
 				for (int i = 0; i < (Object->getObjectData()->faceCount) * 3; i++)
 				{
@@ -389,14 +389,14 @@ void objLoaderClass::importObjFile(ObjectClass *Object)
 		input_file.close();
 }
 
-objDataClass* *objLoaderClass::get_objData()
+VertexDataClass* *objLoaderClass::getVerticeData()
 {
 	return &this->bufferData;
 }
 
-calcDataClass *objLoaderClass::get_calcData()
+ObjectDataClass *objLoaderClass::getObjectData()
 {
-	return &this->CalcRelatedData;
+	return &this->ObjectData;
 }
 
 

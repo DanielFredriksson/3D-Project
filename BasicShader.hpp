@@ -18,6 +18,7 @@ private:
 
 	ID3D11Texture2D*		DepthStencil;		// These has to be initialized by Direct3DContext.CreateDirect3DContext
 	ID3D11DepthStencilView*	DepthStencilView;	//
+	ID3D11SamplerState*		SamplerState;
 
 	ID3D11RenderTargetView*	BackBufferRTV;
 
@@ -27,18 +28,29 @@ public:
 
 	// TO BE PRIVATE BELOW:
 
-
+	/* ------------- COMMENTS -------------
+	OBS: This function is supposed to be called per object!	
+	This function sets the VertexBuffer parameter to the Input Assembly with 
+	the vertexsize (float3*2 + float2) and the offset 0.
+	This function sets shaders and shader resources the first time it's called.
+	[Does not clean]
+	*/
 	void Render(
-		ID3D11DeviceContext*	*DeviceContext,
-		ID3D11Buffer*			*VertexBuffer,
-		calcDataClass			*CalcRelatedData
+		ID3D11DeviceContext*		*DeviceContext,
+		ID3D11Buffer*				*VertexBuffer,
+		ObjectDataClass				*ObjectData,
+		ID3D11ShaderResourceView*	*ShaderResourceView
 	);
+
 	void Clear(
 		ID3D11DeviceContext*	*DeviceContext,
 		ID3D11DepthStencilView*	DepthStencilView
 	);
 
+
 	void InitialiseShaders(ID3D11Device* *Device);
+	void InitializeSamplerState(ID3D11Device* *Device);
+
 
 	void SetShadersAndShaderResources(ID3D11DeviceContext* *DeviceContext);
 	void DefineInputAssembler(
